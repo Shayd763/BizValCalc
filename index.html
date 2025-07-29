@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Business Valuation Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50, #3498db);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            font-weight: 300;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 2px solid #dee2e6;
+            overflow-x: auto;
+        }
+
+        .tab {
+            flex: 1;
+            min-width: 200px;
+            padding: 25px 15px;
+            text-align: center;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #6c757d;
+            transition: all 0.3s ease;
+            position: relative;
+            white-space: nowrap;
+        }
+
+        .tab.active {
+            background: white;
+            color: #2c3e50;
+        }
+
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+        }
+
+        .tab:hover:not(.active) {
+            background: #e9ecef;
+            color: #495057;
+        }
+
+        .content {
+            padding: 50px;
+        }
+
+        .calculation-section {
+            display: none;
+        }
+
+        .calculation-section.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section-header {
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        .section-header h2 {
+            color: #2c3e50;
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+
+        .section-header p {
+            color: #6c757d;
+            font-size: 1.1rem;
+        }
+
+        .form-section {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            border-left: 5px solid #3498db;
+        }
+
+        .form-section h3 {
+            color: #2c3e50;
+            margin-bottom: 25px;
+            font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .form-section h3::before {
+            content: '📊';
+            margin-right: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 1rem;
+        }
+
+        .label-tooltip {
+            font-size: 0.85rem;
+            color: #6c757d;
+            font-weight: 400;
+            font-style: italic;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 15px 18px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        input:hover, select:hover, textarea:hover {
+            border-color: #bdc3c7;
+        }
+
+        .calculate-btn {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            padding: 18px 40px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 30px auto;
+            display: block;
+            min-width: 250px;
+        }
+
+        .calculate-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(52, 152, 219, 0.3);
+        }
+
+        .calculate-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .result {
+            margin-top: 40px;
+            padding: 35px;
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white;
+            border-radius: 15px;
+            display: none;
+            box-shadow: 0 10px 30px rgba(46, 204, 113, 0.3);
+        }
+
+        .result.show {
+            display: block;
+            animation: slideIn 0.6s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result h3 {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .result-value {
+            font-size: 2.8rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .result-details {
+            font-size: 1.1rem;
+            text-align: center;
+            opacity: 0.9;
+        }
+
+        .analysis-section {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-top: 25px;
+            color: #2c3e50;
+        }
+
+        .analysis-section h4 {
+            margin-bottom: 20px;
+            color: #2c3e50;
+            font-size: 1.3rem;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .data-table th, .data-table td {
+            padding: 15px;
+            text-align: center;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .data-table th {
+            background: linear-gradient(135deg, #34495e, #2c3e50);
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .data-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .data-table tr:hover {
+            background: #e3f2fd;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .summary-item {
+            background: rgba(255,255,255,0.2);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .summary-item h5 {
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            opacity: 0.8;
+        }
+
+        .summary-item .value {
+            font-size: 1.4rem;
+            font-weight: bold;
+        }
+
+        .cash-flow-input {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .cash-flow-input label {
+            min-width: 80px;
+            margin-bottom: 0;
+        }
+
+        .cash-flow-input input {
+            flex: 1;
+            margin-bottom: 0;
+        }
+
+        .add-year-btn {
+            background: #27ae60;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .add-year-btn:hover {
+            background: #219a52;
+        }
+
+        .info-box {
+            background: #ecf0f1;
+            border-left: 4px solid #3498db;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .info-box h4 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .info-box p {
+            color: #7f8c8d;
+            line-height: 1.6;
+        }
+
+        .footer {
+            background: #2c3e50;
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .footer p {
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        .footer a {
+            color: #3498db;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                padding: 30px 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .tabs {
+                flex-wrap: wrap;
+            }
+
+            .tab {
+                flex: 1 1 auto;
+                min-width: 150px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Business Valuation Calculator</h1>
+            <p>Professional business valuation using multiple methodologies with detailed analysis</p>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('ebitda')">EBITDA Multiple</button>
+            <button class="tab" onclick="showTab('dcf')">Discounted Cash Flow</button>
+            <button class="tab" onclick="showTab('fcf')">Free Cash Flow</button>
+            <button class="tab" onclick="showTab('irr')">IRR Calculator</button>
+        </div>
+
+        <div class="content">
+            <!-- EBITDA Section -->
+            <div id="ebitda" class="calculation-section active">
+                <div class="section-header">
+                    <h2>EBITDA Multiple Valuation</h2>
+                    <p>Calculate business value using earnings before interest, taxes, depreciation, and amortization</p>
+                </div>
+
+                <div class="info-box">
+                    <h4>About EBITDA Valuation</h4>
+                    <p>This method values your business by multiplying EBITDA by an industry-specific multiple. It's commonly used for quick valuations and comparing businesses within the same sector.</p>
+                </div>
+                
+                <div class="form-section">
+                    <h3>Financial Information</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="revenue">Annual Revenue (£) <span class="label-tooltip">Total income from operations</span></label>
+                            <input type="number" id="revenue" placeholder="e.g., 5000000">
+                        </div>
+                        <div class="form-group">
+                            <label for="expenses">Operating Expenses (£) <span class="label-tooltip">Costs excluding D&A, interest, and taxes</span></label>
+                            <input type="number" id="expenses" placeholder="e.g., 3500000">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="depreciation">Depreciation & Amortization (£) <span class="label-tooltip">Non-cash expenses</span></label>
+                            <input type="number" id="depreciation" placeholder="e.g., 200000">
+                        </div>
+                        <div class="form-group">
+                            <label for="interest">Interest Expense (£) <span class="label-tooltip">Cost of debt financing</span></label>
+                            <input type="number" id="interest" placeholder="e.g., 100000">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="taxes">Tax Expense (£) <span class="label-tooltip">Corporate income taxes</span></label>
+                            <input type="number" id="taxes" placeholder="e.g., 150000">
+                        </div>
+                        <div class="form-group">
+                            <label for="multiplier">Industry Multiplier <span class="label-tooltip">Sector-specific valuation multiple</span></label>
+                            <select id="multiplier">
+                                <option value="6">Software/SaaS (6x)</option>
+                                <option value="4">Technology (4x)</option>
+                                <option value="5">Professional Services (5x)</option>
+                                <option value="4.5">Financial Services (4.5x)</option>
+                                <option value="3.5">Healthcare (3.5x)</option>
+                                <option value="3">Manufacturing (3x)</option>
+                                <option value="2.5">Retail (2.5x)</option>
+                                <option value="2">Real Estate (2x)</option>
+                                <option value="custom">Custom Multiplier</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group" id="customMultiplierDiv" style="display: none;">
+                        <label for="customMultiplier">Custom Multiplier <span class="label-tooltip">Enter your own multiple</span></label>
+                        <input type="number" id="customMultiplier" step="0.1" placeholder="e.g., 3.5">
+                    </div>
+                </div>
+
+                <button class="calculate-btn" onclick="calculateEBITDA()">Calculate EBITDA Valuation</button>
+
+                <div id="ebitdaResult" class="result">
+                    <h3>EBITDA Valuation Result</h3>
+                    <div class="result-value" id="ebitdaValue"></div>
+                    <div class="result-details" id="ebitdaDetails"></div>
+                    <div class="summary-grid" id="ebitdaSummary"></div>
+                </div>
+            </div>
+
+            <!-- DCF Section -->
+            <div id="dcf" class="calculation-section">
+                <div class="section-header">
+                    <h2>Discounted Cash Flow Valuation</h2>
+                    <p>Calculate intrinsic business value by projecting and discounting future cash flows</p>
+                </div>
+
+                <div class="info-box">
+                    <h4>About DCF Valuation</h4>
+                    <p>DCF values a business based on its ability to generate future cash flows. This method projects cash flows over a specific period and calculates their present value using a discount rate (WACC).</p>
+                </div>
+                
+                <div class="form-section">
+                    <h3>Cash Flow Projections</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="initialCashFlow">Current Free Cash Flow (£) <span class="label-tooltip">Most recent year's FCF</span></label>
+                            <input type="number" id="initialCashFlow" placeholder="e.g., 1000000">
+                        </div>
+                        <div class="form-group">
+                            <label for="projectionYears">Projection Period <span class="label-tooltip">Years to project cash flows</span></label>
+                            <select id="projectionYears">
+                                <option value="5">5 Years</option>
+                                <option value="10">10 Years</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>Growth Assumptions</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="growthRate">Annual Growth Rate (%) <span class="label-tooltip">Expected yearly FCF growth</span></label>
+                            <input type="number" id="growthRate" step="0.1" placeholder="e.g., 8.5">
+                        </div>
+                        <div class="form-group">
+                            <label for="terminalGrowth">Terminal Growth Rate (%) <span class="label-tooltip">Long-term growth beyond projection period</span></label>
+                            <input type="number" id="terminalGrowth" step="0.1" placeholder="e.g., 2.5">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>Discount Rate (WACC)</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="discountRate">Discount Rate (%) <span class="label-tooltip">Weighted Average Cost of Capital</span></label>
+                            <input type="number" id="discountRate" step="0.1" placeholder="e.g., 10.0">
+                        </div>
+                        <div class="form-group">
+                            <label for="marketValue">Market Value of Debt (£) <span class="label-tooltip">Total debt outstanding</span></label>
+                            <input type="number" id="marketValue" placeholder="e.g., 500000">
+                        </div>
+                    </div>
+                </div>
+
+                <button class="calculate-btn" onclick="calculateDCF()">Calculate DCF Valuation</button>
+
+                <div id="dcfResult" class="result">
+                    <h3>DCF Valuation Result</h3>
+                    <div class="result-value" id="dcfValue"></div>
+                    <div class="summary-grid" id="dcfSummary"></div>
+                    <div class="analysis-section">
+                        <h4>Cash Flow Projections</h4>
+                        <table class="data-table" id="dcfTable">
+                            <thead>
+                                <tr>
+                                    <th>Year</th>
+                                    <th>Projected FCF (£)</th>
+                                    <th>Discount Factor</th>
+                                    <th>Present Value (£)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dcfTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FCF Section -->
+            <div id="fcf" class="calculation-section">
+                <div class="section-header">
+                    <h2>Free Cash Flow Valuation</h2>
+                    <p>Value business based on its ability to generate cash after all necessary investments</p>
+                </div>
+
+                <div class="info-box">
+                    <h4>About Free Cash Flow Valuation</h4>
+                    <p>This method calculates FCF from operational metrics and applies a perpetual growth model to determine enterprise value. FCF represents cash available to all capital providers.</p>
+                </div>
+                
+                <div class="form-section">
+                    <h3>Operating Performance</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="netIncome">Net Income (£) <span class="label-tooltip">After-tax profit</span></label>
+                            <input type="number" id="netIncome" placeholder="e.g., 800000">
+                        </div>
+                        <div class="form-group">
+                            <label for="fcfDepreciation">Depreciation & Amortization (£) <span class="label-tooltip">Add back non-cash expenses</span></label>
+                            <input type="number" id="fcfDepreciation" placeholder="e.g., 200000">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>Working Capital & Investments</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="workingCapital">Change in Working Capital (£) <span class="label-tooltip">Increase in working capital (negative for growth)</span></label>
+                            <input type="number" id="workingCapital" placeholder="e.g., -100000">
+                        </div>
+                        <div class="form-group">
+                            <label for="capEx">Capital Expenditures (£) <span class="label-tooltip">Investments in fixed assets</span></label>
+                            <input type="number" id="capEx" placeholder="e.g., 300000">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>Valuation Parameters</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="fcfGrowthRate">Long-term Growth Rate (%) <span class="label-tooltip">Perpetual FCF growth rate</span></label>
+                            <input type="number" id="fcfGrowthRate" step="0.1" placeholder="e.g., 3.0">
+                        </div>
+                        <div class="form-group">
+                            <label for="fcfDiscountRate">Discount Rate (WACC) (%) <span class="label-tooltip">Required rate of return</span></label>
+                            <input type="number" id="fcfDiscountRate" step="0.1" placeholder="e.g., 10.0">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="fcfDebt">Total Debt (£) <span class="label-tooltip">Outstanding debt to subtract from enterprise value</span></label>
+                            <input type="number" id="fcfDebt" placeholder="e.g., 500000">
+                        </div>
+                        <div class="form-group">
+                            <label for="fcfCash">Cash & Equivalents (£) <span class="label-tooltip">Cash to add to enterprise value</span></label>
+                            <input type="number" id="fcfCash" placeholder="e.g., 200000">
+                        </div>
+                    </div>
+                </div>
+
+                <button class="calculate-btn" onclick="calculateFCF()">Calculate FCF Valuation</button>
+
+                <div id="fcfResult" class="result">
+                    <h3>Free Cash Flow Valuation Result</h3>
+                    <div class="result-value" id="fcfValue"></div>
+                    <div class="summary-grid" id="fcfSummary"></div>
+                </div>
+            </div>
+
+            <!-- IRR Section -->
+            <div id="irr" class="calculation-section">
+                <div class="section-header">
+                    <h2>Internal Rate of Return (IRR) Calculator</h2>
+                    <p>Calculate the IRR for investment projects and cash flow streams</p>
+                </div>
+
+                <div class="info-box">
+                    <h4>About IRR Calculation</h4>
+                    <p>IRR is the discount rate that makes the net present value (NPV) of all cash flows equal to zero. It represents the expected annual rate of growth an investment will generate.</p>
+                </div>
+                
+                <div class="form-section">
+                    <h3>Investment Details</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="initialInvestment">Initial Investment (£) <span class="label-tooltip">Initial cash outflow (enter as positive number)</span></label>
+                            <input type="number" id="initialInvestment" placeholder="e.g., 1000000">
+                        </div>
+                        <div class="form-group">
+                            <label for="investmentPeriod">Investment Period (Years) <span class="label-tooltip">Duration of the investment</span></label>
+                            <select id="investmentPeriod" onchange="updateCashFlowInputs()">
+                                <option value="3">3 Years</option>
+                                <option value="5">5 Years</option>
+                                <option value="7">7 Years</option>
+                                <option value="10">10 Years</option>
+                                <option value="custom">Custom Period</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group" id="customPeriodDiv" style="display: none;">
+                        <label for="customPeriod">Custom Period (Years) <span class="label-tooltip">Enter custom investment period</span></label>
+                        <input type="number" id="customPeriod" min="1" max="50" placeholder="e.g., 8">
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>Annual Cash Flows</h3>
+                    <div id="cashFlowInputs">
+                        <!-- Cash flow inputs will be generated dynamically -->
+                    </div>
+                </div>
+
+                <button class="calculate-btn" onclick="calculateIRR()">Calculate IRR</button>
+
+                <div id="irrResult" class="result">
+                    <h3>IRR Calculation Result</h3>
+                    <div class="result-value" id="irrValue"></div>
+                    <div class="summary-grid" id="irrSummary"></div>
+                    <div class="analysis-section">
+                        <h4>Cash Flow Analysis</h4>
+                        <table class="data-table" id="irrTable">
+                            <thead>
+                                <tr>
+                                    <th>Year</th>
+                                    <th>Cash Flow (£)</th>
+                                    <th>Present Value at IRR (£)</th>
+                                    <th>Cumulative NPV (£)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="irrTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>&copy; 2025 Developed by Shailen Davdra</p>
+            <p>Contact: <a href="mailto:shailendavdra@gmail.com">shailendavdra@gmail.com</a></p>
+        </div>
+    </div>
+
+    <script>
+        function showTab(tabName) {
+            // Hide all sections
+            const sections = document.querySelectorAll('.calculation-section');
+            sections.forEach(section => section.classList.remove('active'));
+            
+            // Remove active class from all tabs
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            // Show selected section and activate tab
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Show/hide custom multiplier input
+        document.getElementById('multiplier').addEventListener('change', function() {
+            const customDiv = document.getElementById('customMultiplierDiv');
+            if (this.value === 'custom') {
+                customDiv.style.display = 'block';
+            } else {
+                customDiv.style.display = 'none';
+            }
+        });
+
+        // Show/hide custom period input for IRR
+        document.getElementById('investmentPeriod').addEventListener('change', function() {
+            const customDiv = document.getElementById('customPeriodDiv');
+            if (this.value === 'custom') {
+                customDiv.style.display = 'block';
+            } else {
+                customDiv.style.display = 'none';
+            }
+        });
+
+        function formatCurrency(amount) {
+            return '£' + Math.abs(amount).toLocaleString('en-GB', {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            });
+        }
+
+        function calculateEBITDA() {
+            const revenue = parseFloat(document.getElementById('revenue').value) || 0;
+            const expenses = parseFloat(document.getElementById('expenses').value) || 0;
+            const depreciation = parseFloat(document.getElementById('depreciation').value) || 0;
+            const interest = parseFloat(document.getElementById('interest').value) || 0;
+            const taxes = parseFloat(document.getElementById('taxes').value) || 0;
+            
+            let multiplier = parseFloat(document.getElementById('multiplier').value);
+            if (document.getElementById('multiplier').value === 'custom') {
+                multiplier = parseFloat(document.getElementById('customMultiplier').value) || 0;
+            }
+
+            if (revenue <= 0) {
+                alert('Please enter valid financial data');
+                return;
+            }
+
+            const operatingIncome = revenue - expenses;
+            const ebitda = operatingIncome + depreciation;
+            const valuation = ebitda * multiplier;
+
+            document.getElementById('ebitdaValue').textContent = formatCurrency(valuation);
+            
+            const summaryHtml = `
+                <div class="summary-item">
+                    <h5>EBITDA</h5>
+                    <div class="value">${formatCurrency(ebitda)}</div>
+                </div>
+                <div class="summary-item">
+                    <h5>Multiple Applied</h5>
+                    <div class="value">${multiplier}x</div>
+                </div>
+                <div class="summary-item">
+                    <h5>Operating Income</h5>
+                    <div class="value">${formatCurrency(operatingIncome)}</div>
+                </div>
+                <div class="summary-item">
+                    <h5>EBITDA Margin</h5>
+                    <div class="value">${((ebitda/revenue)*100).toFixed(1)}%</div>
+                </div>
+            `;
+            
+            document.getElementById('ebitdaSummary').innerHTML = summaryHtml;
+            document.getElementById('ebitdaResult').classList.add('show');
+        }
+
+        function calculateDCF() {
+            const initialCashFlow = parseFloat(document.getElementById('initialCashFlow').value) || 0;
+            const growthRate = parseFloat(document.getElementById('growthRate').value) / 100 || 0;
+            const discountRate = parseFloat(document.getElementById('discountRate').value) / 100 || 0;
+            const terminalGrowth = parseFloat(document.getElementById('terminalGrowth').value) / 100 || 0;
+            const years = parseInt(document.getElementById('projectionYears').value) || 5;
+            const debt = parseFloat(document.getElementById('marketValue').value) || 0;
+
+            if (initialCashFlow <= 0 || discountRate <= 0 || discountRate <= terminalGrowth) {
+                alert('Please enter valid inputs. Discount rate must be greater than terminal growth rate.');
+                return;
+            }
+
+            let totalPV = 0;
+            const tableBody = document.getElementById('dcfTableBody');
+            tableBody.innerHTML = '';
+
+            // Calculate present value of projected cash flows
+            for (let year = 1; year <= years; year++) {
+                const projectedCashFlow = initialCashFlow * Math.pow(1 + growthRate, year);
+                const discountFactor = 1 / Math.pow(1 + discountRate, year);
+                const presentValue = projectedCashFlow * discountFactor;
+                totalPV += presentValue;
+
+                const row = tableBody.insertRow();
+                row.insertCell(0).textContent = year;
+                row.insertCell(1).textContent = formatCurrency(projectedCashFlow);
+                row.insertCell(2).textContent = discountFactor.toFixed(4);
+                row.insertCell(3).textContent = formatCurrency(presentValue);
+            }
+
+            // Terminal value calculation
+            const terminalCashFlow = initialCashFlow * Math.pow(1 + growthRate, years + 1);
+            const terminalValue = terminalCashFlow / (discountRate - terminalGrowth);
+            const terminalPV = terminalValue / Math.pow(1 + discountRate, years);
+            
+            // Add terminal value row
+            const terminalRow = tableBody.insertRow();
+            terminalRow.style.fontWeight = 'bold';
+            terminalRow.style.backgroundColor = '#e8f4f8';
+            terminalRow.insertCell(0).textContent = 'Terminal';
+            terminalRow.insertCell(1).textContent = formatCurrency(terminalValue);
+            terminalRow.insertCell(2).textContent = (1 / Math.pow(1 + discountRate, years)).toFixed(4);
+            terminalRow.insertCell(3).textContent = formatCurrency(terminalPV);
+            
+            const totalValuation = totalPV + terminalPV;
+            const equityValue = totalValuation - debt;
+
+            document.getElementById('dcfValue').textContent = formatCurrency(equityValue);
+            
+            const summaryHtml = `
+                <div class="summary-item">
+                    <h5>Enterprise Value</h5>
+                    <div class="value">${formatCurrency(totalValuation)}</div>
+                </div>
+                <div class="summary-item">
+                    <h5>Less: Net Debt</h5>
+                    <div class="value">${formatCurrency(debt)}</div>
+                </div>
+                <div class="summary-item">
+                    <h5>PV of Cash Flows</h5>
+                    <div class="value">${formatCurrency(totalPV)}</div>
+                </div>
+                <div class="summary-item">
+                    <h5>Terminal Value PV</h5>
+                    <div class="value">${formatCurrency(terminalPV)}</div>
+                </div>
+            `;
+            
+            document.getElementById('dcfSummary').innerHTML = summaryHtml;
+            document.getElementById('dcfResult').classList.add('show');
+        }
+
+        function calculateFCF() {
+            const netIncome = parseFloat(document.getElementById('netIncome').value) || 0;
+            const depreciation = parseFloat(document.getElementById('fcfDepreciation').value) || 0;
+            const workingCapital = parseFloat(document.getElementById('workingCapital').value) || 0;
+            const capEx = parseFloat(document.getElementById('capEx').value) || 0;
+            const growthRate = parseFloat(document.getElementById('fcfGrowthRate').value) / 100 || 0;
+            const discountRate = parseFloat(document.getElementById('fcfDiscountRate').value) / 100 || 0;
+            const debt = parseFloat(document.getElementById('fcfDebt').value) || 0;
+            const cash = parseFloat(document.getElementById('fcfCash').value) || 0;
+
+            if (netIncome <= 0 || discountRate <= 0 || discountRate <= growthRate) {
+                alert('Please enter valid inputs. Discount rate must be greater than growth rate.');
+                return;
+            }
+
+            const freeCashFlow = netIncome + depreciation - workingCapital - capEx;
+            const nextYearFCF = freeCashFlow * (1 + growthRate);
+            const perpetualValue = nextYearFCF / (discountRate - growthRate);
+            const equityValue = perpetualValue - debt + cash;
+
+            document.getElementById('fcfValue').textContent = formatCurrency(equityValue);
+            
+            const summaryHtml = `
+                <div class="summary-item">
+                    <h5>Current FCF</h5>
+                    <div class="value">${formatCurrency(freeCashFlow)}</div>
+                </div>
+                <div class="summary-item">
+                    <h5>Enterprise Value</h5>
+                    <div class="value">${formatCurrency(perpetualValue)}</div>
+                </div>
+                <div class="summary-item">
+                    <h5>Less: Net Debt</h5>
+                    <div class="value">${formatCurrency(debt - cash)}</div>
+                </div>
+                <div class="summary-item">
+                    <h5>FCF Yield</h5>
+                    <div class="value">${((freeCashFlow / equityValue) * 100).toFixed(2)}%</div>
+                </div>
+            `;
+            
+            document.getElementById('fcfSummary').innerHTML = summaryHtml;
+            document.getElementById('fcfResult').classList.add('show');
+        }
+
+        function updateCashFlowInputs() {
+            const periodSelect = document.getElementById('investmentPeriod');
+            let years;
+            
+            if (periodSelect.value === 'custom') {
+                years = parseInt(document.getElementById('customPeriod').value) || 5;
+            } else {
+                years = parseInt(periodSelect.value);
+            }
+            
+            const container = document.getElementById('cashFlowInputs');
+            container.innerHTML = '';
+            
+            for (let i = 1; i <= years; i++) {
+                const inputDiv = document.createElement('div');
+                inputDiv.className = 'cash-flow-input';
+                inputDiv.innerHTML = `
+                    <label>Year ${i}:</label>
+                    <input type="number" id="cashFlow${i}" placeholder="Enter cash flow for year ${i}">
+                `;
+                container.appendChild(inputDiv);
+            }
+        }
+
+        // Initialize cash flow inputs on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateCashFlowInputs();
+        });
+
+        function calculateIRR() {
+            const initialInvestment = parseFloat(document.getElementById('initialInvestment').value) || 0;
+            
+            if (initialInvestment <= 0) {
+                alert('Please enter a valid initial investment amount.');
+                return;
+            }
+            
+            // Get cash flows
+            const cashFlows = [-initialInvestment]; // Initial investment as negative
+            const periodSelect = document.getElementById('investmentPeriod');
+            let years;
+            
+            if (periodSelect.value === 'custom') {
+                years = parseInt(document.getElementById('customPeriod').value) || 5;
+            } else {
+                years = parseInt(periodSelect.value);
+            }
+            
+            let hasValidCashFlows = false;
+            for (let i = 1; i <= years; i++) {
+                const cashFlow = parseFloat(document.getElementById(`cashFlow${i}`).value) || 0;
+                cashFlows.push(cashFlow);
+                if (cashFlow > 0) hasValidCashFlows = true;
+            }
+            
+            if (!hasValidCashFlows) {
+                alert('Please enter at least one positive cash flow.');
+                return;
+            }
+            
+            // Calculate IRR using Newton-Raphson method
+            const irr = calculateIRRNewtonRaphson(cashFlows);
+            
+            if (irr === null) {
+                alert('Unable to calculate IRR. Please check your cash flows.');
+                return;
+            }
+            
+            // Display results
+            document.getElementById('irrValue').textContent = (irr * 100).toFixed(2) + '%';
+            
+            // Calculate NPV at different rates for comparison
+            const npvAt10 = calculateNPV(cashFlows, 0.10);
+            const npvAt15 = calculateNPV(cashFlows, 0.15);
+            const paybackPeriod = calculatePaybackPeriod(cashFlows);
+            
+            const summaryHtml = `
+                <div class="summary-item">
+                    <h5>IRR</h5>
+                    <div class="value">${(irr * 100).toFixed(2)}%</div>
+                </div>
+                <div class="summary-item">
+                    <h5>NPV at 10%</h5>
+                    <div class="value">${formatCurrency(npvAt10)}</div>
+                </div>
+                <div class="summary-item">
+                    <h5>NPV at 15%</h5>
+                    <div class="value">${formatCurrency(npvAt15)}</div>
+                </div>
+                <div class="summary-item">
+                    <h5>Payback Period</h5>
+                    <div class="value">${paybackPeriod.toFixed(1)} years</div>
+                </div>
+            `;
+            
+            document.getElementById('irrSummary').innerHTML = summaryHtml;
+            
+            // Build IRR table
+            const tableBody = document.getElementById('irrTableBody');
+            tableBody.innerHTML = '';
+            
+            let cumulativeNPV = 0;
+            for (let i = 0; i < cashFlows.length; i++) {
+                const presentValue = cashFlows[i] / Math.pow(1 + irr, i);
+                cumulativeNPV += presentValue;
+                
+                const row = tableBody.insertRow();
+                row.insertCell(0).textContent = i === 0 ? '0 (Initial)' : i;
+                row.insertCell(1).textContent = formatCurrency(cashFlows[i]);
+                row.insertCell(2).textContent = formatCurrency(presentValue);
+                row.insertCell(3).textContent = formatCurrency(cumulativeNPV);
+            }
+            
+            document.getElementById('irrResult').classList.add('show');
+        }
+
+        function calculateIRRNewtonRaphson(cashFlows) {
+            let rate = 0.1; // Initial guess of 10%
+            const tolerance = 0.00001;
+            const maxIterations = 1000;
+            
+            for (let i = 0; i < maxIterations; i++) {
+                let npv = 0;
+                let dnpv = 0;
+                
+                // Calculate NPV and derivative
+                for (let t = 0; t < cashFlows.length; t++) {
+                    const denominator = Math.pow(1 + rate, t);
+                    npv += cashFlows[t] / denominator;
+                    if (t > 0) {
+                        dnpv -= t * cashFlows[t] / Math.pow(1 + rate, t + 1);
+                    }
+                }
+                
+                // Check convergence
+                if (Math.abs(npv) < tolerance) {
+                    return rate;
+                }
+                
+                // Newton-Raphson step
+                if (Math.abs(dnpv) < tolerance) {
+                    break; // Avoid division by zero
+                }
+                
+                rate = rate - npv / dnpv;
+                
+                // Prevent negative rates
+                if (rate < -0.99) {
+                    rate = -0.99;
+                }
+            }
+            
+            return null; // Failed to converge
+        }
+
+        function calculateNPV(cashFlows, rate) {
+            let npv = 0;
+            for (let i = 0; i < cashFlows.length; i++) {
+                npv += cashFlows[i] / Math.pow(1 + rate, i);
+            }
+            return npv;
+        }
+
+        function calculatePaybackPeriod(cashFlows) {
+            let cumulativeCashFlow = cashFlows[0]; // Start with initial investment (negative)
+            
+            for (let i = 1; i < cashFlows.length; i++) {
+                if (cumulativeCashFlow + cashFlows[i] >= 0) {
+                    // Payback occurs during this year
+                    const fraction = -cumulativeCashFlow / cashFlows[i];
+                    return i - 1 + fraction;
+                }
+                cumulativeCashFlow += cashFlows[i];
+            }
+            
+            return cashFlows.length; // Payback period exceeds investment period
+        }
+
+    </script>
+</body>
+</html>
